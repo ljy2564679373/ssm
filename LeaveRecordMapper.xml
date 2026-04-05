@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.java.eams.mapper.LeaveRecordMapper">
+    <resultMap id="LeaveRecordResultMap" type="edu.java.eams.domain.LeaveRecord">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="leaveStartTime" column="leave_start_time"/>
+        <result property="leaveEndTime" column="leave_end_time"/>
+        <result property="leaveReason" column="leave_reason"/>
+        <result property="leaveTypeCode" column="leave_type_code"/>
+        <result property="approveUserId" column="approve_user_id"/>
+        <result property="approveTime" column="approve_time"/>
+        <result property="approveContent" column="approve_content"/>
+        <result property="status" column="status"/>
+        <result property="realEndTime" column="real_end_time"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+    <select id="getAll" resultMap="LeaveRecordResultMap">
+        SELECT l.*, u.name AS user_name
+        FROM emp_leave_record l
+        LEFT JOIN sys_user u ON l.user_id = u.id
+    </select>
+    <select id="getById" parameterType="long" resultMap="LeaveRecordResultMap">
+        SELECT l.*, u.name AS user_name
+        FROM emp_leave_record l
+        LEFT JOIN sys_user u ON l.user_id = u.id
+        WHERE l.id = #{id}
+    </select>
+    <insert id="insert" parameterType="edu.java.eams.domain.LeaveRecord">
+        INSERT INTO emp_leave_record (user_id, create_time, leave_start_time, leave_end_time, leave_reason, leave_type_code, approve_user_id, approve_time, approve_content, status, real_end_time)
+        VALUES (#{userId}, #{createTime}, #{leaveStartTime}, #{leaveEndTime}, #{leaveReason}, #{leaveTypeCode}, #{approveUserId}, #{approveTime}, #{approveContent}, #{status}, #{realEndTime})
+    </insert>
+    <update id="update" parameterType="edu.java.eams.domain.LeaveRecord">
+        UPDATE emp_leave_record
+        SET user_id=#{userId}, create_time=#{createTime}, leave_start_time=#{leaveStartTime}, leave_end_time=#{leaveEndTime}, leave_reason=#{leaveReason}, leave_type_code=#{leaveTypeCode}, approve_user_id=#{approveUserId}, approve_time=#{approveTime}, approve_content=#{approveContent}, status=#{status}, real_end_time=#{realEndTime}
+        WHERE id=#{id}
+    </update>
+    <delete id="delete" parameterType="long">
+        DELETE FROM emp_leave_record WHERE id=#{id}
+    </delete>
+    <select id="getByCondition" resultMap="LeaveRecordResultMap">
+        SELECT l.*, u.name AS user_name FROM emp_leave_record l LEFT JOIN sys_user u ON l.user_id=u.id
+        <where>
+            <if test="employeeName != null and employeeName != ''">
+                AND user_id IN (SELECT id FROM sys_user WHERE name LIKE CONCAT('%', #{employeeName}, '%'))
+            </if>
+            <if test="userId != null">
+                AND l.user_id = #{userId}
+            </if>
+        </where>
+        LIMIT #{start}, #{size}
+    </select>
+    <select id="countByCondition" resultType="int">
+        SELECT COUNT(*) FROM emp_leave_record l
+        <where>
+            <if test="employeeName != null and employeeName != ''">
+                AND l.user_id IN (SELECT id FROM sys_user WHERE name LIKE CONCAT('%', #{employeeName}, '%'))
+            </if>
+            <if test="userId != null">
+                AND l.user_id = #{userId}
+            </if>
+        </where>
+    </select>
+    <!-- 更新审批状态 -->
+    <update id="updateStatus" parameterType="map">
+        UPDATE emp_leave_record
+        <set>
+            status = #{status},
+            <if test="approveUserId != null">approve_user_id = #{approveUserId},</if>
+            <if test="approveTime != null">approve_time = #{approveTime},</if>
+            <if test="approveContent != null">approve_content = #{approveContent},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteByUserId">
+        DELETE FROM emp_leave_record WHERE user_id = #{userId}
+    </delete>
+    <update id="clearApproveUser">
+        UPDATE emp_leave_record SET approve_user_id = NULL WHERE approve_user_id = #{userId}
+    </update>
+</mapper> 

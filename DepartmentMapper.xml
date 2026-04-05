@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.java.eams.mapper.DepartmentMapper">
+    <resultMap id="DepartmentResultMap" type="edu.java.eams.domain.Department">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="managerUserId" column="manager_user_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="DepartmentResultMap">
+        SELECT * FROM sys_dept
+    </select>
+
+    <select id="findById" parameterType="long" resultMap="DepartmentResultMap">
+        SELECT * FROM sys_dept WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="edu.java.eams.domain.Department">
+        INSERT INTO sys_dept(name, manager_user_id, parent_id, status)
+        VALUES(#{name}, #{managerUserId}, #{parentId}, #{status})
+    </insert>
+
+    <update id="update" parameterType="edu.java.eams.domain.Department">
+        UPDATE sys_dept SET
+            name=#{name}, manager_user_id=#{managerUserId}, parent_id=#{parentId},
+            status=#{status}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM sys_dept WHERE id=#{id}
+    </delete>
+
+    <select id="findByCondition" resultMap="DepartmentResultMap">
+        SELECT * FROM sys_dept
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        LIMIT #{start}, #{size}
+    </select>
+
+    <select id="countByCondition" resultType="int">
+        SELECT COUNT(*) FROM sys_dept
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 清空负责人 -->
+    <update id="clearManager">
+        UPDATE sys_dept SET manager_user_id = NULL WHERE manager_user_id = #{managerUserId}
+    </update>
+</mapper> 

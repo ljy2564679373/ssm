@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.java.eams.mapper.PostLevelMapper">
+    <resultMap id="PostLevelResultMap" type="edu.java.eams.domain.PostLevel">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="level" column="level"/>
+        <result property="salary" column="salary"/>
+        <result property="sortCode" column="sort_code"/>
+        <result property="status" column="status"/>
+        <result property="employeeCount" column="employee_count"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="PostLevelResultMap">
+        SELECT p.id,
+               p.name,
+               p.level,
+               p.salary,
+               p.sort_code,
+               p.status,
+               IFNULL(ec.employee_count, 0) AS employee_count
+        FROM emp_post_level p
+        LEFT JOIN (
+            SELECT post_level_id, COUNT(*) AS employee_count
+            FROM emp
+            GROUP BY post_level_id
+        ) ec ON ec.post_level_id = p.id
+        ORDER BY p.sort_code ASC, p.id ASC
+    </select>
+
+    <select id="findById" parameterType="long" resultMap="PostLevelResultMap">
+        SELECT p.id,
+               p.name,
+               p.level,
+               p.salary,
+               p.sort_code,
+               p.status,
+               IFNULL(ec.employee_count, 0) AS employee_count
+        FROM emp_post_level p
+        LEFT JOIN (
+            SELECT post_level_id, COUNT(*) AS employee_count
+            FROM emp
+            GROUP BY post_level_id
+        ) ec ON ec.post_level_id = p.id
+        WHERE p.id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="edu.java.eams.domain.PostLevel">
+        INSERT INTO emp_post_level(name, level, salary, status)
+        VALUES(#{name}, #{level}, #{salary}, #{status})
+    </insert>
+
+    <update id="update" parameterType="edu.java.eams.domain.PostLevel">
+        UPDATE emp_post_level SET
+            name=#{name}, level=#{level}, salary=#{salary}, status=#{status}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM emp_post_level WHERE id=#{id}
+    </delete>
+
+    <select id="findByCondition" resultMap="PostLevelResultMap">
+        SELECT p.id,
+               p.name,
+               p.level,
+               p.salary,
+               p.sort_code,
+               p.status,
+               IFNULL(ec.employee_count, 0) AS employee_count
+        FROM emp_post_level p
+        LEFT JOIN (
+            SELECT post_level_id, COUNT(*) AS employee_count
+            FROM emp
+            GROUP BY post_level_id
+        ) ec ON ec.post_level_id = p.id
+        <where>
+            <if test="name != null and name != ''">
+                AND p.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        ORDER BY p.sort_code ASC, p.id ASC
+        LIMIT #{start}, #{size}
+    </select>
+
+    <select id="countByCondition" resultType="int">
+        SELECT COUNT(*) FROM emp_post_level
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+</mapper> 

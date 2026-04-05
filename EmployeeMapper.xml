@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.java.eams.mapper.EmployeeMapper">
+    <resultMap id="EmployeeResultMap" type="edu.java.eams.domain.Employee">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="email" column="email"/>
+        <result property="mobile" column="mobile"/>
+        <result property="idCard" column="id_card"/>
+        <result property="birthday" column="birthday"/>
+        <result property="sex" column="sex"/>
+        <result property="nationCode" column="nation_code"/>
+        <result property="politicalCode" column="political_code"/>
+        <result property="nativePlace" column="native_place"/>
+        <result property="graduateSchool" column="graduate_school"/>
+        <result property="majorCode" column="major_code"/>
+        <result property="highestEducationCode" column="highest_education_code"/>
+        <result property="highestDegreeCode" column="highest_degree_code"/>
+        <result property="habitation" column="habitation"/>
+        <result property="maritalStatus" column="marital_status"/>
+        <result property="entryDate" column="entry_date"/>
+        <result property="leaveDate" column="leave_date"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="postLevelId" column="post_level_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="roleType" column="role_type"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="EmployeeResultMap">
+        SELECT * FROM emp
+    </select>
+
+    <select id="findById" parameterType="long" resultMap="EmployeeResultMap">
+        SELECT * FROM emp WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="edu.java.eams.domain.Employee">
+        INSERT INTO emp(
+            name, code, email, mobile, id_card, birthday, sex, nation_code, political_code, native_place, graduate_school, major_code, highest_education_code, highest_degree_code, habitation, marital_status, entry_date, leave_date, dept_id, post_level_id, user_id, role_type, status
+        ) VALUES (
+            #{name}, #{code}, #{email}, #{mobile}, #{idCard}, #{birthday}, #{sex}, #{nationCode}, #{politicalCode}, #{nativePlace}, #{graduateSchool}, #{majorCode}, #{highestEducationCode}, #{highestDegreeCode}, #{habitation}, #{maritalStatus}, #{entryDate}, #{leaveDate}, #{deptId}, #{postLevelId}, #{userId}, #{roleType}, #{status}
+        )
+    </insert>
+
+    <update id="update" parameterType="edu.java.eams.domain.Employee">
+        UPDATE emp SET
+            name=#{name}, email=#{email}, mobile=#{mobile}, id_card=#{idCard}, birthday=#{birthday}, sex=#{sex}, nation_code=#{nationCode}, political_code=#{politicalCode}, native_place=#{nativePlace}, graduate_school=#{graduateSchool}, major_code=#{majorCode}, highest_education_code=#{highestEducationCode}, highest_degree_code=#{highestDegreeCode}, habitation=#{habitation}, marital_status=#{maritalStatus}, entry_date=#{entryDate}, leave_date=#{leaveDate}, dept_id=#{deptId}, post_level_id=#{postLevelId}, user_id=#{userId}, role_type=#{roleType}, status=#{status}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM emp WHERE id=#{id}
+    </delete>
+
+    <select id="findByCondition" resultMap="EmployeeResultMap">
+        SELECT * FROM emp
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        LIMIT #{start}, #{size}
+    </select>
+
+    <select id="countByCondition" resultType="int">
+        SELECT COUNT(*) FROM emp
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 清空用户外键 -->
+    <update id="clearUser">
+        UPDATE emp SET user_id = NULL WHERE user_id = #{userId}
+    </update>
+
+    <!-- 通过系统用户ID查询员工信息（用于“个人信息”功能） -->
+    <select id="findByUserId" parameterType="long" resultMap="EmployeeResultMap">
+        SELECT * FROM emp WHERE user_id = #{userId} LIMIT 1
+    </select>
+</mapper> 
